@@ -3,8 +3,9 @@ from scrapy.spiders import CrawlSpider,Rule
 # from scrapy.selector import Selector
 from ..items import BotcnblogsItem,BotItem
 from scrapy.linkextractors import LinkExtractor
-import re
+import re,json
 from ..BotcnblogsPipeline import BotcnblogsPipeline
+
 
 class CnblogsSpider(CrawlSpider):
     pipeline = set([BotcnblogsPipeline,])
@@ -19,17 +20,15 @@ class CnblogsSpider(CrawlSpider):
     
     rules=(
            Rule(LinkExtractor(allow=('fengzheng/default.html\?page\=([\d]+)')),callback='parse_item',follow=True),
-#            Rule(LinkExtractor(allow=('fengzheng/p/([\d]+).html')),callback='parse_info',follow=True),
+           Rule(LinkExtractor(allow=('fengzheng/p/([\d]+).html')),callback='parse_info',follow=True),
            )
     
-#     def parse_info(self,response):
-#         it=BotItem()
-#         it['titles']=response.selector.xpath('/html/head/title').extract()
-#         it['texts']=response.selector.xpath('//div[@id="cnblogs_post_body"]//p/text()').extract()
-#         self.json=open('it.json','w+')
-#         ft=json.dumps(dict(it),ensure_ascii=True)+"\n" 
-#         self.json.write(ft)
-#         return it
+    def parse_info(self,response):
+        it=BotItem()
+        it['titles']=response.selector.xpath('/html/head/title/text()').extract()[0].encode("utf-8")
+        it['texts']=response.selector.xpath('//a[@id="cb_post_title_url"]/text()').extract()[0].encode("utf-8")
+#         print it
+        return it
 #         print(response.selector.xpath('//div[@id="cnblogs_post_body"]//p/text()').extract())
 #         print(response.selector.xpath('//a[@id="cb_post_title_url"]/text()').extract())
 #         print(response.selector.xpath('/html/head/title').extract())
